@@ -1,4 +1,8 @@
-import requests
+import requests#为调用API的库
+import tkinter as tk#为显示窗口的库
+
+
+#awa
 
 
 def print_5day_weather():
@@ -29,6 +33,7 @@ def print_today_weather():
     print('温度:'+weather['result']['realtime']['temperature'])
     print('湿度:'+weather['result']['realtime']['humidity'])
     print('AQI:'+weather['result']['realtime']['aqi'])
+
 def get_weather_response():
     global city,weather,Response_results
     city = input('您想查询天气的城市是:')
@@ -41,6 +46,8 @@ def get_weather_response():
         print('输入的城市是正确的，解析中')
         print_today_weather()
         print_5day_weather()
+        graphical()
+        update_weather()
     else:
         Response_results = False
         print('输入的城市是错误的')
@@ -48,4 +55,43 @@ def get_weather_response():
         print('1.您输入的内容拼写错误，请重新输入后在查询')
         print('2.您输入的内容不是中国的城市名,因为访问的是http://apis.juhe.cn')
         print('2.您输入的内容不是城市名，有可能是省名')
+def update_weather():
+    global updateweather
+    url = 'http://apis.juhe.cn/simpleWeather/query?city='+city+'&key=fe83c9d941eafbbdfc16f0245e061774'#访问网址 
+    response = requests.get(url)#响应结果
+    updateweather = response.json()#json解析
+    if  not updateweather == weather():
+        weather=updateweather
+        print_today_weather()
+        print_5day_weather()
+        graphical()
+        update_weather()
+    else:
+        update_weather()
+def graphical():
+    # 显示图片
+    today_weather = tk.Tk()
+    today_weather.geometry("360x270")
+    today_weather.title('今日天气预报')
+    today_weather.iconbitmap('PY/ico.ico')
+    today_weather.resizable(width=False, height=False)
+    # 加载图片
+    image_path = "PY/今日天气界面.png"
+    image = tk.PhotoImage(file=image_path)
+    label_image = tk.Label(today_weather, image=image)
+    label_image.pack()
+    # 添加文字
+    label_weather = tk.Label(today_weather, text=weather['result']['realtime']['info'],font=("微软雅黑 Light", 10))
+    label_weather.place(x=55, y=60)
+    label_temp = tk.Label(today_weather, text=weather['result']['realtime']['temperature']+'度',font=("微软雅黑 Light", 10))
+    label_temp.place(x=55, y=101)
+    label_direct = tk.Label(today_weather, text=weather['result']['realtime']['direct'],font=("微软雅黑 Light", 10))
+    label_direct.place(x=55, y=143)
+    label_next_weather = tk.Label(today_weather, text=weather['result']['future'][0]['weather'],font=("微软雅黑 Light", 10))
+    label_next_weather.place(x=230, y=60)
+    label_next_temp = tk.Label(today_weather, text=weather['result']['future'][0]['temperature'],font=("微软雅黑 Light", 10))
+    label_next_temp.place(x=230, y=101)
+    label_next_direct = tk.Label(today_weather, text=weather['result']['future'][0]['direct'],font=("微软雅黑 Light", 10))
+    label_next_direct.place(x=230, y=143)
+    today_weather.mainloop()
 get_weather_response()
